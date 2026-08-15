@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Genome Under a Fast — 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./dist/bundle.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow">Interactive multiscale model · epigenetics · WebGL</p>
+    <h1>The Genome in 3D, Under a Fast</h1>
+    <p class="dek">One stimulus — <b>intermittent fasting</b> — traced through five scales of the genome: how chromosomes fold in the nucleus, how nucleosomes and their tails are marked, how methylation shifts across CpG islands, shores and gene bodies, how six representative genes respond, and what phenotype that adds up to. Drag any 3D scene to rotate it; move the slider and everything recomputes together.</p>
+    <p class="tech-note">Rendered with <b>three.js</b> (WebGL) and animated with <b>GSAP</b>.</p>
+  </header>
+
+  <div class="control-bar">
+    <div class="stage-row">
+      <label for="fastSlider">Metabolic state</label>
+      <input type="range" id="fastSlider" min="0" max="100" value="0" step="1">
+      <span class="stage-name" id="stageName">Fed state</span>
+    </div>
+    <div class="stage-ticks" aria-hidden="true">
+      <span>Fed (0–2h post-meal)</span><span>Early fast (6–12h)</span><span>Fasting (16–24h)</span><span>Extended fast (36–48h+)</span>
+    </div>
+    <div class="gene-row" id="genePicker">
+      <span>Inspect gene</span>
+    </div>
+  </div>
+
+  <main>
+
+    <section class="panel">
+      <p class="scale-label">Scale — nucleus · ~10 µm</p>
+      <h2>3D genome architecture</h2>
+      <p class="sub">Inside the nucleus, chromosomes occupy distinct territories. Within a territory, a gene's neighborhood can sit in the <b style="color:var(--ink)">A compartment</b> (open, transcriptionally active, nuclear interior) or the <b style="color:var(--ink)">B compartment</b> (closed, near the nuclear lamina). Locally, CTCF/cohesin extrude a loop that brings an enhancer into contact with the gene's promoter.</p>
+      <div class="gl-stage" id="nucleusStage"><span class="gl-hint">drag to rotate · scroll to zoom</span></div>
+      <div class="methylation-readout">
+        <div class="m"><div class="pct" id="loopStrengthVal">0%</div><div class="lab">loop contact strength</div></div>
+        <div class="m"><div class="pct" id="compartmentVal">0</div><div class="lab">compartment score (A ← → B)</div></div>
+      </div>
+      <p class="caption" id="nucleusCaption"></p>
+    </section>
+
+    <section class="panel">
+      <p class="scale-label">Scale — chromatin fiber · ~10 nm</p>
+      <h2>Nucleosome packing &amp; histone marks</h2>
+      <p class="sub">Each bead is a nucleosome. Wide, even spacing reads as open, accessible <b style="color:var(--ink)">euchromatin</b>; tight, overlapping spacing reads as condensed <b style="color:var(--ink)">heterochromatin</b>. Cones above the promoter-proximal nucleosomes show which post-translational modifications (PTMs) dominate.</p>
+      <div class="gl-stage" id="chromatinStage"><span class="gl-hint">drag to rotate · scroll to zoom</span></div>
+
+      <div class="grid-two" style="margin-top:18px;align-items:end;">
+        <svg viewBox="0 0 560 150" role="img" aria-label="Bar chart of four histone marks">
+          <g font-family="var(--sans)" font-size="11" fill="var(--ink-dim)">
+            <text x="0" y="14">H3K4me3</text>
+            <line x1="120" y1="10" x2="500" y2="10" stroke="var(--grid)" stroke-width="7" stroke-linecap="round"/>
+            <line id="barK4" x1="120" y1="10" x2="120" y2="10" stroke="var(--up)" stroke-width="7" stroke-linecap="round"/>
+            <text id="barK4Val" x="510" y="14" font-family="var(--mono)" font-weight="700" fill="var(--ink)">0</text>
+
+            <text x="0" y="48">H3K27ac</text>
+            <line x1="120" y1="44" x2="500" y2="44" stroke="var(--grid)" stroke-width="7" stroke-linecap="round"/>
+            <line id="barK27ac" x1="120" y1="44" x2="120" y2="44" stroke="var(--up)" stroke-width="7" stroke-linecap="round"/>
+            <text id="barK27acVal" x="510" y="48" font-family="var(--mono)" font-weight="700" fill="var(--ink)">0</text>
+
+            <text x="0" y="90">H3K9me3</text>
+            <line x1="120" y1="86" x2="500" y2="86" stroke="var(--grid)" stroke-width="7" stroke-linecap="round"/>
+            <line id="barK9" x1="120" y1="86" x2="120" y2="86" stroke="var(--down)" stroke-width="7" stroke-linecap="round"/>
+            <text id="barK9Val" x="510" y="90" font-family="var(--mono)" font-weight="700" fill="var(--ink)">0</text>
+
+            <text x="0" y="124">H3K27me3</text>
+            <line x1="120" y1="120" x2="500" y2="120" stroke="var(--grid)" stroke-width="7" stroke-linecap="round"/>
+            <line id="barK27me3" x1="120" y1="120" x2="120" y2="120" stroke="var(--down)" stroke-width="7" stroke-linecap="round"/>
+            <text id="barK27me3Val" x="510" y="124" font-family="var(--mono)" font-weight="700" fill="var(--ink)">0</text>
+          </g>
+        </svg>
+        <div>
+          <div class="legend">
+            <span><i class="sw up"></i>activating (open chromatin)</span>
+            <span><i class="sw down"></i>repressive (closed chromatin)</span>
+          </div>
+          <p class="caption" style="margin-top:10px;">H3K4me3 and H3K27ac mark active promoters/enhancers; H3K9me3 and H3K27me3 mark constitutive and facultative heterochromatin respectively. Values are percentile mark enrichment at this gene's promoter, illustrative.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="scale-label">Scale — DNA · single base pairs</p>
+      <h2>DNA methylation landscape</h2>
+      <p class="sub">Large pink beads on the helix are methylated CpGs; the small plain beads are unmethylated. <b style="color:var(--ink)">CpG islands</b> at promoters stay almost fully unmethylated no matter the state — they're protected. The action is at the <b style="color:var(--ink)">CpG shores</b> flanking them, and — in the opposite direction — the <b style="color:var(--ink)">gene body</b>, where methylation tends to track transcription upward.</p>
+      <div class="gl-stage" id="helixStage" style="height:420px;"><span class="gl-hint">drag to rotate · scroll to zoom</span></div>
+      <div class="methylation-readout">
+        <div class="m"><div class="pct" id="interPct">0%</div><div class="lab">intergenic methylated</div></div>
+        <div class="m"><div class="pct" id="shorePct">0%</div><div class="lab">shore methylated</div></div>
+        <div class="m"><div class="pct" id="islandPct">0%</div><div class="lab">island methylated</div></div>
+        <div class="m"><div class="pct" id="bodyPct">0%</div><div class="lab">gene body methylated</div></div>
+      </div>
+      <div class="legend">
+        <span><i class="sw methyl-dot"></i>methylated CpG</span>
+        <span><i class="sw bare-dot"></i>unmethylated CpG</span>
+      </div>
+      <p class="caption">Gene-body methylation rising alongside expression — rather than falling, like the promoter-adjacent shore — is a well-documented, counter-intuitive feature of active mammalian genes.</p>
+    </section>
+
+    <section class="panel">
+      <p class="scale-label">Scale — transcript · kilobases</p>
+      <h2>Gene activity readout</h2>
+      <p class="sub">All six genes together. Tick marks show the fed baseline; bars show current expression as the fast progresses.</p>
+      <svg viewBox="0 0 900 340" role="img" aria-label="Horizontal bar chart of relative expression for six genes">
+        <text x="0" y="16" font-family="var(--sans)" font-size="11" font-weight="700" letter-spacing=".04em" fill="var(--up)">INDUCED BY FASTING</text>
+        <text x="0" y="192" font-family="var(--sans)" font-size="11" font-weight="700" letter-spacing=".04em" fill="var(--down)">SUPPRESSED BY FASTING</text>
+        <g id="exprBars" font-family="var(--sans)"></g>
+        <g font-family="var(--sans)" font-size="9.5" fill="var(--ink-faint)">
+          <line x1="230" y1="316" x2="230" y2="326" stroke="var(--grid)"/><text x="230" y="336" text-anchor="middle">0</text>
+          <line x1="380" y1="316" x2="380" y2="326" stroke="var(--grid)"/><text x="380" y="336" text-anchor="middle">25</text>
+          <line x1="530" y1="316" x2="530" y2="326" stroke="var(--grid)"/><text x="530" y="336" text-anchor="middle">50</text>
+          <line x1="680" y1="316" x2="680" y2="326" stroke="var(--grid)"/><text x="680" y="336" text-anchor="middle">75</text>
+          <line x1="830" y1="316" x2="830" y2="326" stroke="var(--grid)"/><text x="830" y="336" text-anchor="middle">100</text>
+        </g>
+      </svg>
+      <div class="legend">
+        <span><i class="sw up"></i>induced (up)</span>
+        <span><i class="sw down"></i>suppressed (down)</span>
+        <span><i class="sw line"></i>fed baseline</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="scale-label">Scale — organism</p>
+      <h2>Where it converges: phenotype</h2>
+      <p class="sub">Five downstream programs, each driven by the genes above, feeding one composite phenotypic shift.</p>
+      <svg viewBox="0 0 900 400" role="img" aria-label="Diagram of five gene-driven mechanisms converging into a single fasting-associated phenotype">
+        <g id="gauges" font-family="var(--sans)"></g>
+        <g id="convergeLines"></g>
+        <rect x="700" y="150" width="180" height="110" rx="12" fill="var(--surface-2)" stroke="var(--ink-faint)" stroke-width="1"/>
+        <text x="790" y="192" text-anchor="middle" font-family="var(--serif)" font-size="15" font-weight="700" fill="var(--ink)">Stress-resistant,</text>
+        <text x="790" y="212" text-anchor="middle" font-family="var(--serif)" font-size="15" font-weight="700" fill="var(--ink)">metabolically flexible</text>
+        <text x="790" y="232" text-anchor="middle" font-family="var(--serif)" font-size="15" font-weight="700" fill="var(--ink)">phenotype</text>
+      </svg>
+      <p class="caption">"Phenotype" here means the composite direction these programs point in across repeated fasting exposure — not a guaranteed individual outcome. See the note below on how far this model can be trusted.</p>
+    </section>
+
+  </main>
+
+  <details class="methods">
+    <summary>About this model — what's illustrative vs. established</summary>
+    <h4>What's grounded in known biology</h4>
+    <p>The gene set and its direction of response draw on the SIRT1–AMPK–FOXO3–PGC-1α fasting axis (Cantó &amp; Auwerx 2009; Rodgers et al. 2005), mTOR/S6K1 suppression under nutrient restriction, and reduced NF-κB/IL-6 inflammatory tone with fasting. The methylation architecture — CpG islands staying stably unmethylated while flanking CpG shores carry most of the tissue- and state-specific variation — follows Irizarry et al. 2009. Gene-body methylation rising with transcription, opposite the shore/promoter direction, is a well-replicated genomic pattern. TAD/loop structure via CTCF–cohesin and A/B nuclear compartments follow Dixon et al. 2012 and Lieberman-Aiden et al. 2009.</p>
+    <h4>What's simplified for this visualization</h4>
+    <p>Exact percentages, the smooth 0–100 slider, and any single gene's full multiscale trajectory are an illustrative synthesis, not measurements from one dataset. Real fasting epigenomics varies by tissue, sex, species, fasting duration/protocol, and individual metabolic state; much of the direct evidence is from animal models and short human trials rather than large longitudinal human cohorts. SIRT1's main fasting effect is deacetylase <i>activity</i> (via rising NAD⁺), which this model folds into an "expression" bar alongside genuine transcriptional change, for comparability with the other five genes. Nuclear and chromatin geometry (blob shapes, exact spacing, helix pitch) are stylized for legibility, not to scale or structurally literal.</p>
+    <h4>Read this as</h4>
+    <p>A teaching model of how one stimulus can be traced through nuclear architecture, chromatin, methylation, transcription and physiology as a connected system — not a clinical or diagnostic tool, and not personalized guidance.</p>
+  </details>
+
+  <footer>Educational model · not medical advice · built to explore mechanism, not to diagnose or prescribe</footer>
+</div>
+
+<script src="./dist/bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "genome-3d",
+  "version": "1.0.0",
+  "description": "Interactive 3D model of the genome under intermittent fasting — nuclear architecture, chromatin, DNA methylation, gene activity, and phenotype, built with three.js and GSAP.",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --format=iife --outfile=dist/bundle.js",
+    "build:min": "esbuild src/main.js --bundle --format=iife --minify --outfile=dist/bundle.min.js",
+    "build:artifact": "npm run build && npm run build:min && node build-artifact.mjs",
+    "serve": "python3 -m http.server 8935"
+  },
+  "keywords": ["three.js", "gsap", "webgl", "epigenetics", "visualization"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "gsap": "^3.12.5",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
