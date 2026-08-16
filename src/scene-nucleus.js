@@ -75,6 +75,42 @@ export function createNucleusScene(container){
     membraneMaterial(pal.inkFaint, { opacity: 0.15, roughness: 0.1 })
   ));
 
+  // Compartment zones. The A/B split is radial: the transcriptionally active A
+  // compartment occupies the nuclear interior, while B-compartment chromatin is
+  // tethered at the periphery against the lamina. BackSide on the outer shell
+  // paints only the inner surface, so it reads as a peripheral rind.
+  const aZone = new THREE.Mesh(
+    new THREE.SphereGeometry(NUC_R*0.58, 48, 32),
+    new THREE.MeshBasicMaterial({ color:new THREE.Color(pal.up), transparent:true, opacity:0.07, depthWrite:false })
+  );
+  nucGroup.add(aZone);
+
+  const bZone = new THREE.Mesh(
+    new THREE.SphereGeometry(NUC_R*0.985, 64, 44),
+    new THREE.MeshBasicMaterial({ color:new THREE.Color(pal.down), transparent:true, opacity:0.09, side:THREE.BackSide, depthWrite:false })
+  );
+  nucGroup.add(bZone);
+
+  // Nuclear lamina, the anchor B-compartment chromatin is tethered to.
+  nucGroup.add(new THREE.Mesh(
+    new THREE.SphereGeometry(NUC_R*0.995, 64, 44),
+    new THREE.MeshBasicMaterial({ color:new THREE.Color(pal.down), wireframe:true, transparent:true, opacity:0.06, depthWrite:false })
+  ));
+
+  function zoneLabel(text, pos, cls){
+    const el = document.createElement('div');
+    el.className = 'gl-label ' + cls;
+    el.innerHTML = text;
+    const anchor = new THREE.Object3D();
+    anchor.position.set(...pos);
+    nucGroup.add(anchor);
+    anchor.add(new CSS2DObject(el));
+    return el;
+  }
+  // Kept clear of DIR_VEC (upper-right), where the locus and its label travel.
+  zoneLabel('A compartment<span>active · interior</span>', [-0.95, 0.15, 0.95], 'gl-compartment gl-compartment--a');
+  zoneLabel('B compartment<span>repressed · lamina</span>', [-0.1, -NUC_R - 0.45, 0.3], 'gl-compartment gl-compartment--b');
+
   // Chromosome territories — smooth noise-displaced blobs. Welded normals mean
   // they shade continuously instead of showing polygon facets.
   [
@@ -183,7 +219,7 @@ export function createNucleusScene(container){
     camera.updateProjectionMatrix();
     renderer.setSize(w,h);
     labelRenderer.setSize(w,h);
-    if(autoFit) fitCameraToRadius(camera, controls, 5.35);
+    if(autoFit) fitCameraToRadius(camera, controls, 5.05);
   }
   const ro = new ResizeObserver(resize);
   ro.observe(container);

@@ -4,7 +4,9 @@ import { GENES, GENE_ORDER, INTERGENIC, lerp, val } from './data.js';
 import { createNucleusScene } from './scene-nucleus.js';
 import { createCellScene } from './scene-cell.js';
 import { createChromatinScene } from './scene-chromatin.js';
+import { createEnhancerScene } from './scene-enhancer.js';
 import { createHelixScene } from './scene-helix.js';
+import { createMethContextScene } from './scene-meth-contexts.js';
 
 const round = n => Math.round(n);
 
@@ -29,7 +31,9 @@ function refreshChips(){
 const nucleusScene = createNucleusScene(document.getElementById('nucleusStage'));
 const cellScene = createCellScene(document.getElementById('cellStage'));
 const chromatinScene = createChromatinScene(document.getElementById('chromatinStage'));
+const enhancerScene = createEnhancerScene(document.getElementById('enhancerStage'));
 const helixScene = createHelixScene(document.getElementById('helixStage'));
+const methContextScene = createMethContextScene(document.getElementById('methContextStage'));
 
 // ---------- expression bars (SVG) ----------
 const exprG = document.getElementById('exprBars');
@@ -217,6 +221,34 @@ function update(animate){
   setBarReadout('barK27ac', val(selectedGene,'k27ac',t), animate);
   setBarReadout('barK9', val(selectedGene,'k9',t), animate);
   setBarReadout('barK27me3', val(selectedGene,'k27me3',t), animate);
+
+  // Enhancer close-up. Accessibility is the gene's chromatin openness, but a
+  // suppressed gene's enhancer closes as the fast proceeds, so `access` already
+  // carries the direction — no separate inversion needed.
+  const enhOpen = access / 100;
+  enhancerScene.setState({ open: enhOpen, animate });
+  const stateWord = enhOpen > 0.62 ? 'Euchromatin' : enhOpen < 0.38 ? 'Heterochromatin' : 'Intermediate';
+  document.getElementById('enhStateStat').textContent = stateWord;
+  document.getElementById('enhAccessStat').textContent = round(access) + '%';
+  const tfOcc = Math.round(Math.max(0, (enhOpen - 0.35) / 0.5) * 100);
+  document.getElementById('enhTfStat').textContent = Math.min(tfOcc, 100) + '%';
+  document.getElementById('enhancerCaption').innerHTML =
+    '<b>' + selectedGene + '</b> enhancer — ' + (
+      enhOpen > 0.62
+        ? 'nucleosomes have slid clear of the element, transcription factors are docked, and H3K27ac marks the flanking histones. The enhancer can reach its promoter through the loop.'
+      : enhOpen < 0.38
+        ? 'a nucleosome occupies the element and the array is folded into compact heterochromatin. Transcription factors are physically excluded, so the sequence is intact but unreadable.'
+        : 'the element is partially exposed — nucleosomes are repositioning and factor binding is only beginning to establish.'
+    );
+
+  // Same mark, three genomic addresses.
+  methContextScene.setState({
+    promoter: val(selectedGene,'islandMeth',t),
+    enhancer: val(selectedGene,'enhMeth',t),
+    intergenic: lerp(INTERGENIC,t),
+    dir: GENES[selectedGene].dir,
+    animate
+  });
 
   const inter = lerp(INTERGENIC,t), shore = val(selectedGene,'shoreMeth',t), island = val(selectedGene,'islandMeth',t), body = val(selectedGene,'bodyMeth',t);
   helixScene.setState({ inter, shore, island, body, animate });

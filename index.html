@@ -100,6 +100,19 @@
     </section>
 
     <section class="panel">
+      <p class="scale-label">Close-up — enhancer · ~1 kb</p>
+      <h2>The enhancer, up close</h2>
+      <p class="sub">Zooming onto the enhancer end of that loop. An enhancer only works if proteins can physically reach its DNA. In <b style="color:var(--ink)">euchromatin</b> the nucleosomes slide apart, leaving the element nucleosome-free so transcription factors can dock. In <b style="color:var(--ink)">heterochromatin</b> a nucleosome sits directly on the element and the array folds into a compact zig-zag — the same DNA sequence, now physically unreadable.</p>
+      <div class="gl-stage" id="enhancerStage" style="height:420px;"><span class="gl-hint">drag to rotate · ⌘/ctrl + scroll to zoom</span></div>
+      <div class="stat-strip">
+        <div class="stat"><div class="k">Chromatin state</div><div class="v" id="enhStateStat">—</div></div>
+        <div class="stat"><div class="k">Enhancer accessibility</div><div class="v" id="enhAccessStat">—</div></div>
+        <div class="stat"><div class="k">TF occupancy</div><div class="v" id="enhTfStat">—</div></div>
+      </div>
+      <p class="caption" id="enhancerCaption"></p>
+    </section>
+
+    <section class="panel">
       <p class="scale-label">Scale — DNA · single base pairs</p>
       <h2>DNA methylation landscape</h2>
       <p class="sub">Large pink beads on the helix are methylated CpGs; the small plain beads are unmethylated. <b style="color:var(--ink)">CpG islands</b> at promoters stay almost fully unmethylated no matter the state — they're protected. The action is at the <b style="color:var(--ink)">CpG shores</b> flanking them, and — in the opposite direction — the <b style="color:var(--ink)">gene body</b>, where methylation tends to track transcription upward.</p>
@@ -115,6 +128,18 @@
         <span><i class="sw bare-dot"></i>unmethylated CpG</span>
       </div>
       <p class="caption">Gene-body methylation rising alongside expression — rather than falling, like the promoter-adjacent shore — is a well-documented, counter-intuitive feature of active mammalian genes.</p>
+    </section>
+
+    <section class="panel">
+      <p class="scale-label">Same mark · three addresses</p>
+      <h2>What methylation does depends on where it lands</h2>
+      <p class="sub">A methyl group on a cytosine is chemically identical wherever it sits — but its consequence is set by genomic context. At a <b style="color:var(--ink)">promoter CpG island</b> it acts as an on/off switch; at an <b style="color:var(--ink)">enhancer</b> it acts as a rheostat that tunes how hard the enhancer drives its target; <b style="color:var(--ink)">intergenically</b> it isn't gene regulation at all, but genome defence against transposable elements.</p>
+      <div class="gl-stage" id="methContextStage" style="height:440px;"><span class="gl-hint">drag to rotate · ⌘/ctrl + scroll to zoom</span></div>
+      <div class="legend" style="margin-top:14px;">
+        <span><i class="sw methyl-dot"></i>methylated CpG</span>
+        <span><i class="sw bare-dot"></i>unmethylated CpG</span>
+      </div>
+      <p class="caption">The promoter island is the outlier: it stays unmethylated in essentially every state, which is why fasting's regulatory action shows up at enhancers and shores instead. Promoter-island methylation is largely reserved for permanent decisions — imprinting, X-inactivation, and aberrant silencing in cancer.</p>
     </section>
 
     <section class="panel">

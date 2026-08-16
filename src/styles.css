@@ -80,6 +80,27 @@ main{display:flex;flex-direction:column;gap:22px;margin-top:28px;}
   .gl-organelle-label:not(.gl-organelle-label--key){display:none;}
 }
 
+/* A/B compartment callouts in the nucleus */
+.gl-compartment{font:700 9.5px/1.2 var(--sans);letter-spacing:.03em;text-align:center;padding:4px 7px;}
+.gl-compartment span{display:block;font-weight:500;font-size:8.5px;letter-spacing:.01em;color:var(--ink-faint);margin-top:2px;text-transform:none;}
+.gl-compartment--a{color:var(--up);border-color:color-mix(in srgb, var(--up) 45%, var(--border));}
+.gl-compartment--b{color:var(--down);border-color:color-mix(in srgb, var(--down) 45%, var(--border));}
+
+/* methylation-by-context rows */
+.gl-context-title{font:700 10px/1 var(--sans);letter-spacing:.07em;background:transparent;border:none;color:var(--ink-faint);padding:0;white-space:nowrap;}
+.gl-context-pct{font:700 13px/1 var(--mono);padding:4px 8px;}
+.gl-context-pct[data-level="high"]{color:var(--methyl);border-color:color-mix(in srgb, var(--methyl) 45%, var(--border));}
+.gl-context-pct[data-level="mid"]{color:var(--ink-dim);}
+.gl-context-pct[data-level="low"]{color:var(--ink-faint);}
+.gl-context-consequence{font:500 10.5px/1.3 var(--sans);max-width:340px;white-space:normal;text-align:center;transition:color .35s ease;}
+.gl-context-consequence b{font-weight:700;}
+.gl-context-consequence[data-tone="on"]{color:var(--up);border-color:color-mix(in srgb, var(--up) 40%, var(--border));}
+.gl-context-consequence[data-tone="off"]{color:var(--down);border-color:color-mix(in srgb, var(--down) 40%, var(--border));}
+.gl-context-consequence[data-tone="neutral"]{color:var(--ink-dim);}
+@media (max-width:620px){
+  .gl-context-consequence{max-width:190px;font-size:9.5px;}
+}
+
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-dim);margin-top:4px;}
 .legend span{display:inline-flex;align-items:center;gap:6px;}
 .sw{width:10px;height:10px;border-radius:3px;display:inline-block;}
