@@ -33,7 +33,13 @@ export function createNucleusScene(container){
   labelRenderer.domElement.style.pointerEvents = 'none';
   container.appendChild(labelRenderer.domElement);
 
-  const controls = new OrbitControls(camera, labelRenderer.domElement);
+  // Controls must listen on the WebGL canvas: the CSS2D label layer sits on top
+  // with pointer-events:none, so it never receives pointer events itself.
+  const controls = new OrbitControls(camera, renderer.domElement);
+  // OrbitControls forces touchAction:'none' in its constructor, which would trap
+  // one-finger page scrolling on mobile. pan-y gives vertical scrolling back to
+  // the page while horizontal drags still rotate the scene.
+  renderer.domElement.style.touchAction = 'pan-y';
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 7;

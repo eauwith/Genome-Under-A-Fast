@@ -42,7 +42,10 @@ export function createChromatinScene(container){
   labelRenderer.domElement.style.pointerEvents='none';
   container.appendChild(labelRenderer.domElement);
 
-  const controls = new OrbitControls(camera, labelRenderer.domElement);
+  // Listen on the canvas, not the pointer-events:none CSS2D label layer.
+  const controls = new OrbitControls(camera, renderer.domElement);
+  // Undo OrbitControls' touchAction:'none' so mobile page scrolling still works.
+  renderer.domElement.style.touchAction = 'pan-y';
   controls.enableDamping = true; controls.dampingFactor = 0.08;
   controls.minDistance = 6; controls.maxDistance = 14;
   controls.minPolarAngle = Math.PI*0.30; controls.maxPolarAngle = Math.PI*0.66;
