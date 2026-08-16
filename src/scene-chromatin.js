@@ -4,6 +4,8 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 import { gsap } from 'gsap';
 import { getPalette } from './theme.js';
 import { attachSway } from './sway.js';
+import { fitCameraToRadius } from './render-quality.js';
+import { gateZoomBehindModifier } from './zoom-gate.js';
 
 const N_NUC = 11;
 const PROMOTER_A = 5, PROMOTER_B = 6;
@@ -46,6 +48,9 @@ export function createChromatinScene(container){
   const controls = new OrbitControls(camera, renderer.domElement);
   // Undo OrbitControls' touchAction:'none' so mobile page scrolling still works.
   renderer.domElement.style.touchAction = 'pan-y';
+  gateZoomBehindModifier(controls, renderer.domElement);
+  let autoFit = true;
+  controls.addEventListener('start', () => { autoFit = false; });
   controls.enableDamping = true; controls.dampingFactor = 0.08;
   controls.minDistance = 6; controls.maxDistance = 14;
   controls.minPolarAngle = Math.PI*0.30; controls.maxPolarAngle = Math.PI*0.66;
@@ -104,6 +109,7 @@ export function createChromatinScene(container){
     if(!w || !h) return;
     camera.aspect = w/h; camera.updateProjectionMatrix();
     renderer.setSize(w,h); labelRenderer.setSize(w,h);
+    if(autoFit) fitCameraToRadius(camera, controls, 5.20);
   }
   const ro = new ResizeObserver(resize); ro.observe(container); resize();
 

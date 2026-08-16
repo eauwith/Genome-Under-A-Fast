@@ -5,6 +5,8 @@ import { gsap } from 'gsap';
 import { getPalette } from './theme.js';
 import { seededShuffle } from './data.js';
 import { attachSway } from './sway.js';
+import { fitCameraToRadius } from './render-quality.js';
+import { gateZoomBehindModifier } from './zoom-gate.js';
 
 const L = 9.0, R = 0.5, TURNS = 6.0;
 const ZONES = [
@@ -44,6 +46,9 @@ export function createHelixScene(container){
   const controls = new OrbitControls(camera, renderer.domElement);
   // Undo OrbitControls' touchAction:'none' so mobile page scrolling still works.
   renderer.domElement.style.touchAction = 'pan-y';
+  gateZoomBehindModifier(controls, renderer.domElement);
+  let autoFit = true;
+  controls.addEventListener('start', () => { autoFit = false; });
   controls.enableDamping = true; controls.dampingFactor = 0.08;
   controls.minDistance = 6.5; controls.maxDistance = 15;
   controls.minPolarAngle = Math.PI*0.28; controls.maxPolarAngle = Math.PI*0.66;
@@ -174,6 +179,7 @@ export function createHelixScene(container){
     if(!w || !h) return;
     camera.aspect = w/h; camera.updateProjectionMatrix();
     renderer.setSize(w,h); labelRenderer.setSize(w,h);
+    if(autoFit) fitCameraToRadius(camera, controls, 4.85);
   }
   const ro = new ResizeObserver(resize); ro.observe(container); resize();
 

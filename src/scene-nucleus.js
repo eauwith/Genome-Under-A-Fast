@@ -4,6 +4,8 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 import { gsap } from 'gsap';
 import { getPalette } from './theme.js';
 import { attachSway } from './sway.js';
+import { gateZoomBehindModifier } from './zoom-gate.js';
+import { configureRenderer, environmentFor, organicGeometry, membraneMaterial, tissueMaterial, fitCameraToRadius } from './render-quality.js';
 
 // Composition is laid out symmetrically about x=0 so the orbit target is the
 // true centre of the figure and neither half swings out of frame.
@@ -21,8 +23,8 @@ export function createNucleusScene(container){
   camera.position.set(0, 1.9, 11.5);
 
   const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  configureRenderer(renderer);
+  scene.environment = environmentFor(renderer);
   renderer.domElement.style.position = 'absolute';
   renderer.domElement.style.inset = '0';
   container.appendChild(renderer.domElement);
@@ -40,6 +42,9 @@ export function createNucleusScene(container){
   // one-finger page scrolling on mobile. pan-y gives vertical scrolling back to
   // the page while horizontal drags still rotate the scene.
   renderer.domElement.style.touchAction = 'pan-y';
+  gateZoomBehindModifier(controls, renderer.domElement);
+  let autoFit = true;
+  controls.addEventListener('start', () => { autoFit = false; });
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
   controls.minDistance = 7;
@@ -64,26 +69,22 @@ export function createNucleusScene(container){
   nucGroup.position.copy(NUC_CENTER);
   world.add(nucGroup);
 
+  // Nuclear envelope: a refractive shell rather than a flat translucent sphere.
   nucGroup.add(new THREE.Mesh(
-    new THREE.SphereGeometry(NUC_R, 40, 28),
-    new THREE.MeshPhysicalMaterial({ color: new THREE.Color(pal.inkFaint), transparent:true, opacity:0.09, roughness:0.9, metalness:0, side:THREE.DoubleSide })
-  ));
-  nucGroup.add(new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(NUC_R, 2), 20),
-    new THREE.LineBasicMaterial({ color: new THREE.Color(pal.inkFaint), transparent:true, opacity:0.32 })
+    new THREE.SphereGeometry(NUC_R, 96, 64),
+    membraneMaterial(pal.inkFaint, { opacity: 0.15, roughness: 0.1 })
   ));
 
-  // Chromosome territories — flat-shaded so their facets catch the light and
-  // they read as separate 3D bodies rather than one soft lump.
-  const blobColor = new THREE.Color(pal.surface2);
+  // Chromosome territories — smooth noise-displaced blobs. Welded normals mean
+  // they shade continuously instead of showing polygon facets.
   [
-    {p:[-0.55,0.55,0.3],  s:0.92, sc:[1,1.15,0.9],  o:0.62},
-    {p:[0.6,-0.35,-0.4],  s:1.0,  sc:[1.1,0.9,1],   o:0.5},
-    {p:[-0.2,-0.75,0.55], s:0.78, sc:[0.9,1,1.1],   o:0.72},
+    {p:[-0.55,0.55,0.3],  s:0.92, sc:[1,1.15,0.9],  o:0.72, seed:11},
+    {p:[0.6,-0.35,-0.4],  s:1.0,  sc:[1.1,0.9,1],   o:0.6,  seed:29},
+    {p:[-0.2,-0.75,0.55], s:0.78, sc:[0.9,1,1.1],   o:0.8,  seed:47},
   ].forEach(b=>{
     const m = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(b.s, 1),
-      new THREE.MeshStandardMaterial({ color: blobColor, transparent:true, opacity:b.o, roughness:0.85, flatShading:true })
+      organicGeometry(b.s, { detail: 4, amp: 0.13, freq: 1.35, seed: b.seed }),
+      tissueMaterial(pal.surface2, { roughness: 0.55, opacity: b.o })
     );
     m.position.set(...b.p);
     m.scale.set(...b.sc);
@@ -91,8 +92,8 @@ export function createNucleusScene(container){
   });
 
   const locus = new THREE.Mesh(
-    new THREE.SphereGeometry(0.15, 24, 18),
-    new THREE.MeshStandardMaterial({ color: new THREE.Color(pal.up), emissive: new THREE.Color(pal.up), emissiveIntensity:0.55, roughness:0.35 })
+    new THREE.SphereGeometry(0.15, 48, 32),
+    tissueMaterial(pal.up, { roughness: 0.28, emissive: pal.up, emissiveIntensity: 0.5 })
   );
   nucGroup.add(locus);
 
@@ -182,6 +183,7 @@ export function createNucleusScene(container){
     camera.updateProjectionMatrix();
     renderer.setSize(w,h);
     labelRenderer.setSize(w,h);
+    if(autoFit) fitCameraToRadius(camera, controls, 5.35);
   }
   const ro = new ResizeObserver(resize);
   ro.observe(container);

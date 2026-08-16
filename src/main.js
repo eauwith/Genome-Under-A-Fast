@@ -2,6 +2,7 @@ import './styles.css';
 import { gsap } from 'gsap';
 import { GENES, GENE_ORDER, INTERGENIC, lerp, val } from './data.js';
 import { createNucleusScene } from './scene-nucleus.js';
+import { createCellScene } from './scene-cell.js';
 import { createChromatinScene } from './scene-chromatin.js';
 import { createHelixScene } from './scene-helix.js';
 
@@ -26,6 +27,7 @@ function refreshChips(){
 
 // ---------- three.js scenes ----------
 const nucleusScene = createNucleusScene(document.getElementById('nucleusStage'));
+const cellScene = createCellScene(document.getElementById('cellStage'));
 const chromatinScene = createChromatinScene(document.getElementById('chromatinStage'));
 const helixScene = createHelixScene(document.getElementById('helixStage'));
 
@@ -175,6 +177,36 @@ function update(animate){
     ', with enhancer–promoter loop contact at ' + round(loop) + '%.';
   document.getElementById('loopStrengthVal').textContent = round(loop) + '%';
   document.getElementById('compartmentVal').textContent = round(compA) + (compA>=50 ? ' (A)' : ' (B)');
+
+  // The cell view is a whole-cell readout, so it tracks the programs driving
+  // each organelle rather than the single inspected gene. Each is normalised
+  // against that gene's own fed→fasted range: 0 = fed, 1 = extended fast.
+  const norm = (gene, key) => {
+    const [a, b] = GENES[gene][key];
+    return b === a ? 0 : (val(gene, key, t) - a) / (b - a);
+  };
+  const counts = cellScene.setState({
+    mito:  norm('PPARGC1A','expr'),
+    auto:  norm('ATG7','expr'),
+    lyso:  norm('FOXO3','expr'),
+    lipid: 1 - 0.65*(t/100),              // droplets are consumed, not abolished
+    // RPS6KB1 falls, so ribosome density falls — but translation is damped, not
+    // abolished, so this floors at ~30% rather than reaching zero.
+    ribo:  1 - 0.7*norm('RPS6KB1','expr'),
+    animate
+  });
+  document.getElementById('mitoStat').textContent  = counts.mitoCount;
+  document.getElementById('autoStat').textContent  = counts.autoCount;
+  document.getElementById('lysoStat').textContent  = counts.lysoCount;
+  document.getElementById('lipidStat').textContent = counts.lipidPct + '%';
+  document.getElementById('riboStat').textContent  = counts.riboPct + '%';
+  document.getElementById('cellCaption').innerHTML = t < 17
+    ? 'Fed: lipid droplets are full, ribosomes crowd the rough ER under mTOR-driven protein synthesis, and autophagosomes are essentially absent.'
+    : t < 50
+      ? 'Early fast: insulin falls and mTOR signalling eases — ribosome density starts dropping and the first autophagosomes form.'
+      : t < 83
+        ? 'Fasting: autophagy is running, lysosomes multiply to fuse with autophagosomes, and PGC-1α is driving mitochondrial biogenesis.'
+        : 'Extended fast: autophagy dominates, the mitochondrial network is expanded and elongated, and lipid droplets have been substantially consumed.';
 
   const access = val(selectedGene,'access',t);
   const actLevel = (val(selectedGene,'k4',t)+val(selectedGene,'k27ac',t))/2;

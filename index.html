@@ -36,7 +36,7 @@
       <p class="scale-label">Scale — nucleus · ~10 µm</p>
       <h2>3D genome architecture</h2>
       <p class="sub">Inside the nucleus, chromosomes occupy distinct territories. Within a territory, a gene's neighborhood can sit in the <b style="color:var(--ink)">A compartment</b> (open, transcriptionally active, nuclear interior) or the <b style="color:var(--ink)">B compartment</b> (closed, near the nuclear lamina). Locally, CTCF/cohesin extrude a loop that brings an enhancer into contact with the gene's promoter.</p>
-      <div class="gl-stage" id="nucleusStage"><span class="gl-hint">drag to rotate · scroll to zoom</span></div>
+      <div class="gl-stage" id="nucleusStage"><span class="gl-hint">drag to rotate · ⌘/ctrl + scroll to zoom</span></div>
       <div class="methylation-readout">
         <div class="m"><div class="pct" id="loopStrengthVal">0%</div><div class="lab">loop contact strength</div></div>
         <div class="m"><div class="pct" id="compartmentVal">0</div><div class="lab">compartment score (A ← → B)</div></div>
@@ -45,10 +45,25 @@
     </section>
 
     <section class="panel">
+      <p class="scale-label">Scale — cell · ~20 µm</p>
+      <h2>The cell and its organelles</h2>
+      <p class="sub">Zooming out from the nucleus to the whole cell. Fasting is not only a nuclear event — it visibly remodels the cytoplasm. Watch the <b style="color:var(--ink)">autophagosomes</b> appear and multiply, <b style="color:var(--ink)">mitochondria</b> increase and elongate, <b style="color:var(--ink)">lipid droplets</b> shrink as they're burned for fuel, and <b style="color:var(--ink)">ribosomes</b> thin out on the rough ER as mTOR-driven protein synthesis is dialled down.</p>
+      <div class="gl-stage" id="cellStage" style="height:460px;"><span class="gl-hint">drag to rotate · ⌘/ctrl + scroll to zoom</span></div>
+      <div class="stat-strip">
+        <div class="stat"><div class="k">Mitochondrial mass</div><div class="v" id="mitoStat">—</div></div>
+        <div class="stat"><div class="k">Autophagosomes</div><div class="v" id="autoStat">—</div></div>
+        <div class="stat"><div class="k">Lysosomes</div><div class="v" id="lysoStat">—</div></div>
+        <div class="stat"><div class="k">Lipid droplet size</div><div class="v" id="lipidStat">—</div></div>
+        <div class="stat"><div class="k">Ribosome density</div><div class="v" id="riboStat">—</div></div>
+      </div>
+      <p class="caption" id="cellCaption"></p>
+    </section>
+
+    <section class="panel">
       <p class="scale-label">Scale — chromatin fiber · ~10 nm</p>
       <h2>Nucleosome packing &amp; histone marks</h2>
       <p class="sub">Each bead is a nucleosome. Wide, even spacing reads as open, accessible <b style="color:var(--ink)">euchromatin</b>; tight, overlapping spacing reads as condensed <b style="color:var(--ink)">heterochromatin</b>. Cones above the promoter-proximal nucleosomes show which post-translational modifications (PTMs) dominate.</p>
-      <div class="gl-stage" id="chromatinStage"><span class="gl-hint">drag to rotate · scroll to zoom</span></div>
+      <div class="gl-stage" id="chromatinStage"><span class="gl-hint">drag to rotate · ⌘/ctrl + scroll to zoom</span></div>
 
       <div class="grid-two" style="margin-top:18px;align-items:end;">
         <svg viewBox="0 0 560 150" role="img" aria-label="Bar chart of four histone marks">
@@ -88,7 +103,7 @@
       <p class="scale-label">Scale — DNA · single base pairs</p>
       <h2>DNA methylation landscape</h2>
       <p class="sub">Large pink beads on the helix are methylated CpGs; the small plain beads are unmethylated. <b style="color:var(--ink)">CpG islands</b> at promoters stay almost fully unmethylated no matter the state — they're protected. The action is at the <b style="color:var(--ink)">CpG shores</b> flanking them, and — in the opposite direction — the <b style="color:var(--ink)">gene body</b>, where methylation tends to track transcription upward.</p>
-      <div class="gl-stage" id="helixStage" style="height:420px;"><span class="gl-hint">drag to rotate · scroll to zoom</span></div>
+      <div class="gl-stage" id="helixStage" style="height:420px;"><span class="gl-hint">drag to rotate · ⌘/ctrl + scroll to zoom</span></div>
       <div class="methylation-readout">
         <div class="m"><div class="pct" id="interPct">0%</div><div class="lab">intergenic methylated</div></div>
         <div class="m"><div class="pct" id="shorePct">0%</div><div class="lab">shore methylated</div></div>
