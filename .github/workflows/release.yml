@@ -1,0 +1,42 @@
+name: Release
+
+# Tag a version to cut a release with the standalone page attached:
+#   git tag v1.0.0 && git push origin v1.0.0
+# This works on a private repo on the Free plan, unlike GitHub Pages.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & attach standalone page
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build:artifact
+      - run: npm run check
+
+      - name: Name the file after the tag
+        id: name
+        run: |
+          REF="${GITHUB_REF_NAME:-manual}"
+          cp dist/artifact.html "genome-under-a-fast-${REF}.html"
+          echo "file=genome-under-a-fast-${REF}.html" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.name.outputs.file }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true

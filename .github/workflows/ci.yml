@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # dist/ is gitignored, so CI always builds from source.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build bundles
+        run: npm run build
+
+      - name: Build standalone artifact
+        run: npm run build:artifact
+
+      - name: Verify build
+        run: npm run check
+
+      - name: Report bundle sizes
+        run: |
+          {
+            echo "### Build output"
+            echo ""
+            echo "| File | Size |"
+            echo "| --- | ---: |"
+            for f in dist/bundle.js dist/bundle.min.js dist/bundle.css dist/artifact.html; do
+              [ -f "$f" ] && printf '| `%s` | %s |\n' "$f" "$(du -h "$f" | cut -f1)"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # The publishable page, downloadable from the run's Artifacts section.
+      - name: Upload standalone page
+        uses: actions/upload-artifact@v4
+        with:
+          name: genome-under-a-fast
+          path: dist/artifact.html
+          retention-days: 30
+          if-no-files-found: error

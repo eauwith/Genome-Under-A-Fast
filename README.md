@@ -51,6 +51,41 @@ npm run build:artifact
 Writes `dist/artifact.html` — a single self-contained file (CSS and minified JS
 inlined, no external requests) suitable for publishing anywhere as one page.
 
+## CI/CD
+
+`npm run check` runs the build guards in `scripts/check-build.mjs`, which encode
+this project's actual constraints rather than generic linting:
+
+- the standalone artifact exists and stays under the 16 MB publish limit
+- it references **no external URLs** and makes no external network calls — the
+  published page runs under a CSP that blocks every external host, so a stray
+  CDN `<script>` is a shipping bug
+- every element id referenced by `getElementById` in `src/` exists in
+  `index.html` — a missing id fails silently at load in a page with six
+  independent WebGL scenes
+- every `scene-*.js` module is actually mounted in `main.js`
+
+Three workflows live in `.github/workflows/`:
+
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| `ci.yml` | push / PR to `main` | installs, builds, runs the guards, and uploads `artifact.html` as a downloadable build artifact (30-day retention) |
+| `release.yml` | tag matching `v*` | builds and attaches the standalone page to a GitHub Release |
+| `pages.yml` | manual only | deploys the page to GitHub Pages |
+
+To cut a release:
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+**Note on Pages:** GitHub Pages is not available for private repositories on the
+Free plan, so `pages.yml` is manual-trigger only and fails fast with an
+explanatory message while the repo is private. It becomes usable as soon as the
+repo is made public or the account moves to Pro — at which point set
+Settings → Pages → Source to "GitHub Actions". Until then, `ci.yml` and
+`release.yml` cover build verification and distribution.
+
 ## Disclaimer
 
 Educational model, not medical advice. Exact percentages and the smooth 0–100 slider
